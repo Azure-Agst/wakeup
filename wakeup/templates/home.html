@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WakeUp!</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body>
+        <div class="flex flex-col h-screen justify-between">
+
+            <!-- Header -->
+            <header class="bg-[#006A4E] text-white py-6">
+                <div class="container mx-auto px-4 flex justify-between items-center">
+                    <h1 class="text-3xl font-bold">
+                        Wake-on-LAN Dispatcher
+                    </h1>
+                </div>
+            </header>
+
+            <!-- Main List -->
+            <main class="mb-auto container mx-auto px-4 py-4">
+
+                {% for server in servers %}
+                <!-- Individual Item -->
+                <div class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition flex justify-between">
+                    <h3 class="text-xl font-semibold text-[#006A4E]mb-2 my-auto">{{ server.name }}</h2>
+                    <button onclick="wakeServer('{{ server.name }}')"
+                        class="px-6 py-2 min-w-[120px] text-center text-white bg-green-900 border border-green-950 rounded active:text-green-900 hover:bg-transparent hover:text-green-900 focus:outline-none focus:ring">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6 m-auto">
+                            <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                        </svg>                  
+                    </button>
+                </div>
+                {% endfor %}
+
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-gray-100 text-gray-600 py-2 px-3 mt-16">
+                <p class="italic">(C) 2024 Andrew "Azure-Agst" Augustine</p>
+            </footer>
+
+            <!-- Modal -->
+            <div id="modalConfirm" class="fixed hidden z-50 inset-0 bg-gray-900 bg-opacity-60 overflow-y-auto h-full w-full px-4 ">
+                <div class="relative top-40 mx-auto shadow-xl rounded-md bg-white max-w-md">
+                    <div class="flex justify-end p-2">
+                        <button onclick="closeModal('modalConfirm')" type="button"
+                            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd"
+                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-6 pt-0 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-20 h-20 text-green-900 mx-auto">
+                            <path fill-rule="evenodd" d="M10.5 3.75a6 6 0 0 0-5.98 6.496A5.25 5.25 0 0 0 6.75 20.25H18a4.5 4.5 0 0 0 2.206-8.423 3.75 3.75 0 0 0-4.133-4.303A6.001 6.001 0 0 0 10.5 3.75Zm2.03 5.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 1 0 1.06 1.06l1.72-1.72v4.94a.75.75 0 0 0 1.5 0v-4.94l1.72 1.72a.75.75 0 1 0 1.06-1.06l-3-3Z" clip-rule="evenodd" />
+                        </svg>
+                        <h3 id="modalText" class="text-xl font-normal text-gray-500 mt-5 mb-6">Broadcasted wake-up packet!</h3>
+                        <button href="#" onclick="closeModal('modalConfirm')"
+                            class="px-6 py-2 min-w-[120px] text-center text-white bg-green-900 border border-green-950 rounded active:text-green-900 hover:bg-transparent hover:text-green-900 focus:outline-none focus:ring">
+                            Dismiss
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Scripts -->
+        <script type="text/javascript">
+            window.wakeServer = async function(mac) {
+                const url = "/wake/" + mac;
+                const res = await fetch(url, {method: "POST"});
+                if (!res.ok) console.error("Server error!");
+                openModal('modalConfirm')
+            }
+
+            window.openModal = function(modalId) {
+                document.getElementById(modalId).style.display = 'block'
+                document.getElementsByTagName('body')[0].classList.add('overflow-y-hidden')
+            }
+        
+            window.closeModal = function(modalId) {
+                document.getElementById(modalId).style.display = 'none'
+                document.getElementsByTagName('body')[0].classList.remove('overflow-y-hidden')
+            }
+        
+            // Close all modals when press ESC
+            document.onkeydown = function(event) {
+                event = event || window.event;
+                if (event.keyCode === 27) {
+                    document.getElementsByTagName('body')[0].classList.remove('overflow-y-hidden')
+                    let modals = document.getElementsByClassName('modal');
+                    Array.prototype.slice.call(modals).forEach(i => {
+                        i.style.display = 'none'
+                    })
+                }
+            };
+        </script>
+    </body>
+</html>

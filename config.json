@@ -1,0 +1,7 @@
+{
+    "broadcastAddr": "10.0.0.255",
+    "port": 4000,
+    "servers": [
+        {"name": "Test Server", "mac": "FF:FF:FF:FF:FF:FF"}
+    ]
+}
